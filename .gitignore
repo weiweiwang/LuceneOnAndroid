@@ -1,0 +1,8 @@
+.idea/
+.project
+LuceneOnAndroid.iml
+bin/
+gen/
+local.properties
+out/
+
