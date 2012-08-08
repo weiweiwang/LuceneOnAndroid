@@ -1,10 +1,16 @@
-package com.dianxinos;
+package com.dianxinos.lucenecontacts;
 
 import android.app.Activity;
+import android.content.ContentResolver;
+import android.database.Cursor;
 import android.os.Bundle;
 import android.os.Environment;
+import android.provider.ContactsContract;
 import android.text.method.ScrollingMovementMethod;
 import android.util.Log;
+import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.TextView;
 import net.sourceforge.pinyin4j.PinyinHelper;
 import net.sourceforge.pinyin4j.format.HanyuPinyinCaseType;
@@ -27,10 +33,8 @@ import org.apache.lucene.store.FSDirectory;
 import org.apache.lucene.store.NRTCachingDirectory;
 import org.apache.lucene.util.Version;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -86,14 +90,30 @@ public class LuceneActivity extends Activity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
-        TextView textView = (TextView) findViewById(R.id.text);
+        final TextView textView = (TextView) findViewById(R.id.text);
         textView.setMovementMethod(new ScrollingMovementMethod());
+
+        final EditText editText = (EditText) findViewById(R.id.input);
+        final Button button = (Button) findViewById(R.id.search);
+
+        button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                String query = editText.getText().toString();
+                final int n = 10;
+                List<Map<String, Object>> docs = new ArrayList<Map<String, Object>>(n);
+                long start = System.currentTimeMillis();
+                long hits = query(query, n, docs);
+                textView.setText("time used(ms):" + (System.currentTimeMillis() - start) + ",hits:" + hits + ",docs:" + docs.toString() + "\n");
+            }
+        });
+
         Logger.LEVEL = Log.VERBOSE;
         try {
             File indexDir = new File(Environment.getExternalStorageDirectory(), "lucene");
             boolean alreadyExisted = indexDir.exists();
             directory = FSDirectory.open(indexDir);
-            NRTCachingDirectory cachedFSDir = new NRTCachingDirectory(directory, 1.0, 2.0);
+            NRTCachingDirectory cachedFSDir = new NRTCachingDirectory(directory, 0.5, 1.0);
             Map<String, Analyzer> fieldAnalyzers = new HashMap<String, Analyzer>();
             fieldAnalyzers.put("name", new StandardAnalyzer(Version.LUCENE_36));
             fieldAnalyzers.put("phone", new NGramAnalyzer(Version.LUCENE_36));
@@ -109,49 +129,55 @@ public class LuceneActivity extends Activity {
             }
             if (!alreadyExisted) {
                 long start = System.currentTimeMillis();
-                long total = rebuildIndex();
+                long total = rebuildContactsIndex();
                 long end = System.currentTimeMillis();
                 textView.append("\nbuild:" + total + " contacts, time used(ms):" + (end - start));
             }
             try {
                 textView.append("\nnumDocs:" + indexWriter.numDocs() + "\n");
-                List<Map<String, Object>> docs = new ArrayList<Map<String, Object>>(5);
-
-                textView.append("query:999\n");
-                long start = System.currentTimeMillis();
-                long hits = query("999", 5, docs);
-                textView.append("time used(ms):" + (System.currentTimeMillis() - start) + ",hits:" + hits + ",docs:" + docs.toString() + "\n");
-                docs.clear();
-
-                textView.append("query:92649\n");
-                start = System.currentTimeMillis();
-                hits = query("92649", 5, docs);
-                textView.append("time used(ms):" + (System.currentTimeMillis() - start) + ",hits:" + hits + ",docs:" + docs.toString() + "\n");
-                docs.clear();
-
-                textView.append("query:82642\n");
-                start = System.currentTimeMillis();
-                hits = query("82642", 5, docs);
-                textView.append("time used(ms):" + (System.currentTimeMillis() - start) + ",hits:" + hits + ",docs:" + docs.toString() + "\n");
-                docs.clear();
-
-                textView.append("query:825\n");
-                start = System.currentTimeMillis();
-                hits = query("825", 5, docs);
-                textView.append("time used(ms):" + (System.currentTimeMillis() - start) + ",hits:" + hits + ",docs:" + docs.toString() + "\n");
-                docs.clear();
-
-                textView.append("query:1381\n");
-                start = System.currentTimeMillis();
-                hits = query("1381", 5, docs);
-                textView.append("time used(ms):" + (System.currentTimeMillis() - start) + ",hits:" + hits + ",docs:" + docs.toString() + "\n");
-                docs.clear();
-
-                textView.append("query:111\n");
-                start = System.currentTimeMillis();
-                hits = query("111", 5, docs);
-                textView.append("time used(ms):" + (System.currentTimeMillis() - start) + ",hits:" + hits + ",docs:" + docs.toString() + "\n");
-                docs.clear();
+//                List<Map<String, Object>> docs = new ArrayList<Map<String, Object>>(5);
+//
+//                textView.append("query:999\n");
+//                long start = System.currentTimeMillis();
+//                long hits = query("999", 5, docs);
+//                textView.append("time used(ms):" + (System.currentTimeMillis() - start) + ",hits:" + hits + ",docs:" + docs.toString() + "\n");
+//                docs.clear();
+//
+//                textView.append("query:92649\n");
+//                start = System.currentTimeMillis();
+//                hits = query("92649", 5, docs);
+//                textView.append("time used(ms):" + (System.currentTimeMillis() - start) + ",hits:" + hits + ",docs:" + docs.toString() + "\n");
+//                docs.clear();
+//
+//                textView.append("query:82642\n");
+//                start = System.currentTimeMillis();
+//                hits = query("82642", 5, docs);
+//                textView.append("time used(ms):" + (System.currentTimeMillis() - start) + ",hits:" + hits + ",docs:" + docs.toString() + "\n");
+//                docs.clear();
+//
+//                textView.append("query:825\n");
+//                start = System.currentTimeMillis();
+//                hits = query("825", 5, docs);
+//                textView.append("time used(ms):" + (System.currentTimeMillis() - start) + ",hits:" + hits + ",docs:" + docs.toString() + "\n");
+//                docs.clear();
+//
+//                textView.append("query:1381\n");
+//                start = System.currentTimeMillis();
+//                hits = query("1381", 5, docs);
+//                textView.append("time used(ms):" + (System.currentTimeMillis() - start) + ",hits:" + hits + ",docs:" + docs.toString() + "\n");
+//                docs.clear();
+//
+//                textView.append("query:111\n");
+//                start = System.currentTimeMillis();
+//                hits = query("111", 5, docs);
+//                textView.append("time used(ms):" + (System.currentTimeMillis() - start) + ",hits:" + hits + ",docs:" + docs.toString() + "\n");
+//                docs.clear();
+//
+//                textView.append("query:7933\n");
+//                start = System.currentTimeMillis();
+//                hits = query("7933", 5, docs);
+//                textView.append("time used(ms):" + (System.currentTimeMillis() - start) + ",hits:" + hits + ",docs:" + docs.toString() + "\n");
+//                docs.clear();
             } catch (IOException e) {
                 Logger.w(TAG, e.toString(), e);
             }
@@ -169,7 +195,7 @@ public class LuceneActivity extends Activity {
         boosts.put("phone", 1.0F);
         MultiFieldQueryParser multiFieldQueryParser = new MultiFieldQueryParser(Version.LUCENE_36, boosts.keySet().toArray(new String[0]), new StandardAnalyzer(Version.LUCENE_36), boosts);
         try {
-            Query q = query == null ? new MatchAllDocsQuery() : multiFieldQueryParser.parse(query);
+            Query q = (query == null || query.isEmpty()) ? new MatchAllDocsQuery() : multiFieldQueryParser.parse(query);
             Logger.d(TAG, "query:" + q.toString());
             IndexReader indexReader = IndexReader.open(indexWriter, true);
             IndexSearcher indexSearcher = new IndexSearcher(indexReader);
@@ -190,24 +216,49 @@ public class LuceneActivity extends Activity {
         return 0;
     }
 
-    public long rebuildIndex() {
-        long total = 0;
-        try {
-            BufferedReader reader = new BufferedReader(new InputStreamReader(getAssets().open("name_phone.txt")));
-            String line = null;
-            int id = 0;
-            HanyuPinyinOutputFormat format = new HanyuPinyinOutputFormat();
-            format.setCaseType(HanyuPinyinCaseType.LOWERCASE);
-            format.setToneType(HanyuPinyinToneType.WITHOUT_TONE);
-            format.setVCharType(HanyuPinyinVCharType.WITH_V);
-            while ((line = reader.readLine()) != null) {
-                line = line.trim();
-                if (line.isEmpty()) continue;
-                total++;
-                String[] splits = line.split("\t");
+    public long rebuildContactsIndex() {
+        ContentResolver cr = getContentResolver();
+        //取得电话本中开始一项的光标，必须先moveToNext()
+        Cursor cursor = cr.query(ContactsContract.Contacts.CONTENT_URI, null, null, null, null);
+        long hits = 0;
+        HanyuPinyinOutputFormat format = new HanyuPinyinOutputFormat();
+        format.setCaseType(HanyuPinyinCaseType.LOWERCASE);
+        format.setToneType(HanyuPinyinToneType.WITHOUT_TONE);
+        format.setVCharType(HanyuPinyinVCharType.WITH_V);
+        while (cursor.moveToNext()) {
+            hits++;
+            try {
+                //取得联系人的名字索引
+                int nameIndex = cursor.getColumnIndex(ContactsContract.PhoneLookup.DISPLAY_NAME);
+                String name = cursor.getString(nameIndex);
+                if (name != null) {
+                    name = name.trim();
+                }
+                if (name == null || name.isEmpty()) {
+                    continue;
+                }
+
+                //取得联系人的ID索引值
+                String contactId = cursor.getString(cursor.getColumnIndex(ContactsContract.Contacts._ID));
+                //查询该位联系人的电话号码，类似的可以查询email，photo
+                Cursor phone = cr.query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI, null,
+                        ContactsContract.CommonDataKinds.Phone.CONTACT_ID + " = "
+                                + contactId, null, null);//第一个参数是确定查询电话号，第三个参数是查询具体某个人的过滤值
+                //一个人可能有几个号码
+                List<String> phones = new ArrayList<String>();
+                while (phone.moveToNext()) {
+                    String phoneNumber = phone.getString(phone.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER)).trim();
+                    if (phoneNumber.isEmpty()) {
+                        continue;
+                    }
+                    phones.add(phoneNumber.replaceAll("[^+\\d]", ""));
+                }
+                phone.close();
+                if (phones.isEmpty()) {
+                    continue;
+                }
+
                 Document document = new Document();
-                String name = splits[0];
-                String phone = splits[1];
                 char[] nameChars = name.toCharArray();
                 StringBuilder firstLetters = new StringBuilder();
                 StringBuilder pinyinLetters = new StringBuilder();
@@ -223,24 +274,30 @@ public class LuceneActivity extends Activity {
                 }
                 String jianpin = getT9String(firstLetters.toString());
                 String pinyin = getT9String(pinyinLetters.toString());
-                ++id;
-                Logger.d(TAG, "name:" + name + ",phone:" + phone + ",pinyin:" + pinyin + ",jianpin:" + jianpin);
                 document.add(new Field("name", name, Field.Store.YES, Field.Index.NOT_ANALYZED));
                 document.add(new Field("pinyin", pinyin, Field.Store.NO, Field.Index.ANALYZED));
                 if (!pinyin.equalsIgnoreCase(jianpin)) {
                     document.add(new Field("jianpin", jianpin, Field.Store.NO, Field.Index.ANALYZED));
                 }
-                document.add(new Field("phone", phone, Field.Store.YES, Field.Index.ANALYZED));
-                document.add(new Field("id", String.valueOf(id), Field.Store.YES, Field.Index.NOT_ANALYZED));
-                indexWriter.updateDocument(new Term("id", String.valueOf(id)), document);
+                for (String phoneNumber : phones) {
+                    document.add(new Field("phone", phoneNumber, Field.Store.YES, Field.Index.ANALYZED));
+                }
+
+                Logger.d(TAG, "name:" + name + ",phone:" + phones + ",pinyin:" + pinyin + ",jianpin:" + jianpin);
+                indexWriter.updateDocument(new Term("id", contactId), document);
+            } catch (Exception e) {
+                Logger.d(TAG, e.toString(), e);
             }
-            Map<String, String> userData = new HashMap<String, String>();
-            userData.put("action", "rebuild");
-            indexWriter.commit(userData);
-        } catch (Exception e) {
-            Logger.w(TAG, e.toString(), e);
         }
-        return total;
+        cursor.close();
+        Map<String, String> userData = new HashMap<String, String>();
+        userData.put("action", "rebuild");
+        try {
+            indexWriter.commit(userData);
+        } catch (IOException e) {
+            Logger.d(TAG, e.toString(), e);
+        }
+        return hits;
     }
 
     private String getT9String(String str) {
@@ -266,6 +323,7 @@ public class LuceneActivity extends Activity {
         } catch (IOException e) {
             Logger.w(TAG, e.toString(), e);
         }
+        finish();
     }
 
 }

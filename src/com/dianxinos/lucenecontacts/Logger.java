@@ -1,4 +1,4 @@
-package com.dianxinos;
+package com.dianxinos.lucenecontacts;
 
 import android.util.Log;
 
