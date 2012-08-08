@@ -1,4 +1,4 @@
-package com.dianxinos;
+package com.dianxinos.lucenecontacts;
 
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.TokenStream;
@@ -20,6 +20,6 @@ public class NGramAnalyzer extends Analyzer {
     }
     @Override
     public TokenStream tokenStream(String fieldName, Reader reader) {
-        return new NGramTokenFilter(new StandardTokenizer(matchVersion,reader),2,6);
+        return new NGramTokenFilter(new StandardTokenizer(matchVersion,reader),2,11);
     }
 }

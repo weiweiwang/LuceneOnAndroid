@@ -1,4 +1,4 @@
-package com.dianxinos;
+package com.dianxinos.lucenecontacts;
 
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.TokenStream;
