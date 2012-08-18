@@ -7,8 +7,7 @@
     <TextView
         android:id="@+id/indextotal"
         android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:text="index totalnum..." />
+        android:layout_height="wrap_content"/>
 
     <TextView
         android:id="@+id/write"
@@ -105,14 +104,15 @@
             android:id="@+id/button10"
             android:layout_width="79dp"
             android:layout_height="wrap_content"
-            android:text="@string/t11" />
+            android:onClick="setT9Value"
+            android:text="@string/t10" />
 
         <Button
             android:id="@+id/button11"
             android:layout_width="79dp"
             android:layout_height="wrap_content"
             android:onClick="setT9Value"
-            android:text="@string/t10" />
+            android:text="@string/t11" />
 
         <Button
             android:id="@+id/button12"
@@ -135,6 +135,6 @@
         android:layout_height="wrap_content"
         android:maxLines="1000"
         android:scrollbars="vertical"
-        android:text="Lucene Test on Android for T9 and phone search" />
+         />
 
 </LinearLayout>

@@ -1,4 +1,4 @@
-package com.dianxinos.lucenecontacts;
+package weiweiwang.github.lucenecontacts;
 
 /**
  * Licensed to the Apache Software Foundation (ASF) under one or more

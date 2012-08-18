@@ -9,8 +9,8 @@
     <string name="t7">7/PQRS</string>
     <string name="t8">8/TUV</string>
     <string name="t9">9/WXYZ</string>
-    <string name="t11">*</string>
-    <string name="t10">0/+</string>
+    <string name="t10">*</string>
+    <string name="t11">0/+</string>
     <string name="t12">rebuild</string>
     <string name="t13">del</string>
     <string name="app_name">LuceneOnAndroid</string>

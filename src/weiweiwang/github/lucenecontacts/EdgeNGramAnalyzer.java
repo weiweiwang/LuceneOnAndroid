@@ -1,4 +1,4 @@
-package com.dianxinos.lucenecontacts;
+package weiweiwang.github.lucenecontacts;
 
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.TokenStream;
@@ -12,14 +12,18 @@ import java.io.Reader;
  *         Date: 8/5/12
  *         Time: 4:46 PM
  */
-public class NGramAnalyzer extends Analyzer {
+final public class EdgeNGramAnalyzer extends Analyzer {
     protected final Version matchVersion;
-    public NGramAnalyzer(Version version)
+    private  int minGram;
+    private int maxGram;
+    public EdgeNGramAnalyzer(Version version,int minGram,int maxGram)
     {
         matchVersion = version;
+        this.minGram = minGram;
+        this.maxGram= maxGram;
     }
     @Override
     public TokenStream tokenStream(String fieldName, Reader reader) {
-        return new NGramTokenFilter(new StandardTokenizer(matchVersion,reader),2,11);
+        return new EdgeNGramTokenFilter(new StandardTokenizer(matchVersion,reader), EdgeNGramTokenFilter.Side.FRONT,minGram,maxGram);
     }
 }

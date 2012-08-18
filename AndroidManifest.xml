@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-          package="com.dianxinos.lucenecontacts"
+          package="weiweiwang.github.lucenecontacts"
           android:versionCode="1"
           android:versionName="1.0">
     <uses-sdk android:minSdkVersion="10"/>
     <application android:label="@string/app_name">
-        <activity android:name=".LuceneActivity"
+        <activity android:name="weiweiwang.github.lucenecontacts.LuceneActivity"
                   android:label="@string/app_name"
                   android:launchMode="singleTask"
                   android:clearTaskOnLaunch="true">

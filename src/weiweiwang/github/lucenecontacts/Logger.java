@@ -1,4 +1,4 @@
-package com.dianxinos.lucenecontacts;
+package weiweiwang.github.lucenecontacts;
 
 import android.util.Log;
 
